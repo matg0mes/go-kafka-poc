@@ -11,10 +11,10 @@ func main() {
 	deliveryChan := make(chan kafka.Event)
 
 	producer := NewKafkaProducer()
-	Publish("Mensagem", "teste", producer, nil, deliveryChan)
+	Publish("Mensagem", "teste", producer, []byte("Transfeeeer"), deliveryChan)
 	go DeliveryReport(deliveryChan) // async
 
-	producer.Flush(1000)
+	producer.Flush(3000)
 	// e := <-deliveryChan
 	// msg := e.(*kafka.Message)
 	// if msg.TopicPartition.Error != nil {
@@ -26,7 +26,10 @@ func main() {
 
 func NewKafkaProducer() *kafka.Producer {
 	configMap := &kafka.ConfigMap{
-		"bootstrap.servers": "go-kafka-poc-kafka-1:9092",
+		"bootstrap.servers":   "go-kafka-poc-kafka-1:9092",
+		"delivery.timeout.ms": "0",
+		"acks":                "all",
+		"enable.idempotence":  "true",
 	}
 
 	p, err := kafka.NewProducer(configMap)
